@@ -49,3 +49,15 @@ class OrderModel(BaseModel):
                 "pizza_size": "LARGE"
             }
         }
+        
+        
+class OrderStatusModel(BaseModel):
+    order_status : Optional[str] = "PENDING"
+    
+    class Config:
+        from_attributes = True
+        json_schema_extra = {
+            "example":{
+                "order_status" : "PENDING"
+            }
+        }

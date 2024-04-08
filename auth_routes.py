@@ -20,6 +20,9 @@ session = Session(bind=engine) #map session to database
 
 @auth_router.get('/')  # create instances similar to main api instance -> routers create diff routes to diff func
 async def hello(Authorize:AuthJWT=Depends()):
+    """
+        ## Sample Route
+    """
     try:
         Authorize.jwt_required()
     
@@ -31,10 +34,20 @@ async def hello(Authorize:AuthJWT=Depends()):
     return {"message": "Hiii"}
 
 
-@auth_router.post('/signup',
-                  status_code=status.HTTP_201_CREATED
-                  )
+@auth_router.post('/signup', status_code=status.HTTP_201_CREATED)
 async def signup(user:SignUpModel):
+    """
+        ## Creat a User
+        requires -> 
+        ```
+                username: int
+                email: str
+                password: str
+                is_staff: Bool,
+                is_active: Bool
+        ```
+    """
+    
     db_email = session.query(User).filter(User.email==user.email).first()
     
     if db_email is not None:
@@ -57,9 +70,9 @@ async def signup(user:SignUpModel):
         is_staff = user.is_staff
     )
     
-    Session.add(new_user)
+    session.add(new_user)
     
-    Session.commit
+    session.commit
     
     return new_user 
 
@@ -68,7 +81,17 @@ async def signup(user:SignUpModel):
 @auth_router.post('/login', status_code=200)
 #query -> check user exists or not
 async def login(user:LoginModel, Authorize:AuthJWT=Depends()):
-    db_user = Session.query(User).filter(User.username==user.username).first()
+    """
+        ## LogIn a User
+        require ->
+        ```
+                username: str
+                password: str
+        ```
+        and returns a token pair 'access' and 'refresh'
+    """
+    
+    db_user = session.query(User).filter(User.username==user.username).first()
 
     if db_user and check_password_hash(db_user.password, user.password):
         access_token = Authorize.create_access_token(subject=db_user.username)
@@ -89,6 +112,10 @@ async def login(user:LoginModel, Authorize:AuthJWT=Depends()):
 #Refreshing Tokens
 @auth_router.get('/refresh')
 async def refresh_token(Authorize:AuthJWT=Depends()):
+    """
+        ## Create a Fresh Token
+        require -> a refresh token
+    """
     try:
         Authorize.jwt_refresh_token_required()
         

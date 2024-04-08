@@ -14,6 +14,7 @@ class User(Base):
     is_active = Column(Boolean, default=False)
     orders = relationship('Order', back_populates='user') #this is for relationship between user-order
     
+    
     def __repr__(self): #function to return representation of obj created from class "Data"
         return f"<user {self.username}"
 
@@ -31,6 +32,7 @@ class Order(Base):
         ('LARGE', 'large'),
         ('EXTRA-LARGE', 'extra-large')
     )
+    
     
     __tablename__ = "orders"
     id = Column(Integer,primary_key=True)
