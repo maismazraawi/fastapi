@@ -1,9 +1,9 @@
 from fastapi import APIRouter, status, Depends
 from fastapi.exceptions import HTTPException
 from DataBase import Session, engine
+from sqlalchemy.orm import Session
 from schemas import SignUpModel, LoginModel
 from models import User
-from fastapi.exceptions import HTTPException
 from werkzeug.security import generate_password_hash, check_password_hash
 from fastapi_jwt_auth import AuthJWT
 from fastapi.encoders import jsonable_encoder 
@@ -16,22 +16,6 @@ auth_router = APIRouter(  # prefix to create seperate routes -> acsess from http
 
 
 session = Session(bind=engine) #map session to database
-
-
-@auth_router.get('/')  # create instances similar to main api instance -> routers create diff routes to diff func
-async def hello(Authorize:AuthJWT=Depends()):
-    """
-        ## Sample Route
-    """
-    try:
-        Authorize.jwt_required()
-    
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="Invalid Token"
-                            )
-    
-    return {"message": "Hiii"}
 
 
 @auth_router.post('/signup', status_code=status.HTTP_201_CREATED)
@@ -63,6 +47,7 @@ async def signup(user:SignUpModel):
                              )
 
     new_user = User(
+        id = user.id,
         username = user.username,
         email = user.email,
         password = generate_password_hash(user.password),
@@ -72,10 +57,18 @@ async def signup(user:SignUpModel):
     
     session.add(new_user)
     
-    session.commit
+    session.commit()
     
-    return new_user 
-
+    response = {
+        "User created successfully"
+        "id": new_user.id,
+        "username": new_user.username,
+        "email": new_user.email,
+        "is_active": new_user.is_active,
+        "is_staff": new_user.is_staff
+    }
+    
+    return jsonable_encoder(response)
 
 # Login Route
 @auth_router.post('/login', status_code=200)

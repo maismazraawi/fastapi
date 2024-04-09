@@ -8,10 +8,10 @@ class User(Base):
     __tablename__ = 'user'
     id = Column(Integer,primary_key=True)
     username = Column(String(25), unique=True)
-    email = Column(String(80), unique=True)
+    email = Column(String(90), unique=True)
     password = Column(Text, nullable=True)
-    is_staff = Column(Boolean, default=False)
-    is_active = Column(Boolean, default=False)
+    is_staff = Column(Boolean, default=True)
+    is_active = Column(Boolean, default=True)
     orders = relationship('Order', back_populates='user') #this is for relationship between user-order
     
     

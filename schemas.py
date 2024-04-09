@@ -16,7 +16,7 @@ class SignUpModel(BaseModel):
                 "username": "maismazraawi",
                 "email": "maismazraawi@gmail.com",
                 "password": "password",
-                "is_staff": False,
+                "is_staff": True,
                 "is_active": True
             }
         }
