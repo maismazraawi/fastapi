@@ -47,7 +47,7 @@ async def signup(user:SignUpModel):
                              )
 
     new_user = User(
-        id = user.id,
+        #id = user.id,
         username = user.username,
         email = user.email,
         password = generate_password_hash(user.password),
@@ -60,8 +60,7 @@ async def signup(user:SignUpModel):
     session.commit()
     
     response = {
-        "User created successfully"
-        "id": new_user.id,
+        #"id": new_user.id,
         "username": new_user.username,
         "email": new_user.email,
         "is_active": new_user.is_active,
@@ -71,7 +70,7 @@ async def signup(user:SignUpModel):
     return jsonable_encoder(response)
 
 # Login Route
-@auth_router.post('/login', status_code=200)
+@auth_router.post('/login', status_code=status.HTTP_202_ACCEPTED)
 #query -> check user exists or not
 async def login(user:LoginModel, Authorize:AuthJWT=Depends()):
     """
@@ -101,25 +100,3 @@ async def login(user:LoginModel, Authorize:AuthJWT=Depends()):
                         detail="Invalid Username or Password"
                         )
     
-    
-#Refreshing Tokens
-@auth_router.get('/refresh')
-async def refresh_token(Authorize:AuthJWT=Depends()):
-    """
-        ## Create a Fresh Token
-        require -> a refresh token
-    """
-    try:
-        Authorize.jwt_refresh_token_required()
-        
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="Please Provide a Refreshed Token"
-                            )
-    
-    current_user = Authorize._get_jwt_identifier()
-    
-    access_token = Authorize.create_access_token(subject=current_user)
-    
-    return jsonable_encoder({"access":access_token})        
-

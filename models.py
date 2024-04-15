@@ -2,16 +2,17 @@ from DataBase import Base
 from sqlalchemy import Column, Integer, Boolean, Text, String, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils.types import ChoiceType
+import reprlib
 
 
 class User(Base):
     __tablename__ = 'user'
-    id = Column(Integer,primary_key=True)
+    id = Column(Integer,primary_key=True, autoincrement=True)
     username = Column(String(25), unique=True)
     email = Column(String(90), unique=True)
     password = Column(Text, nullable=True)
-    is_staff = Column(Boolean, default=True)
-    is_active = Column(Boolean, default=True)
+    is_staff = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=False)
     orders = relationship('Order', back_populates='user') #this is for relationship between user-order
     
     
@@ -35,7 +36,7 @@ class Order(Base):
     
     
     __tablename__ = "orders"
-    id = Column(Integer,primary_key=True)
+    id = Column(Integer,primary_key=True, autoincrement=True)
     quantity = Column(Integer, nullable=False)
     order_status = Column(ChoiceType(choices=ORDER_STATUSES), default="PENDING")
     pizza_size = Column(ChoiceType(choices=PIZZA_SIZES), default="SMALL")

@@ -8,4 +8,4 @@ engine = create_engine('postgresql://postgres:mys0206887@localhost/pizzaDelivery
 
 Base = declarative_base() #help in CRUD of api/DB resources
 
-Session = sessionmaker(bind=engine)  #create session instances 
+Session = sessionmaker()  #create session instances 

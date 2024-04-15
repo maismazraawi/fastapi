@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, status
 from fastapi.exceptions import HTTPException
+from fastapi.responses import JSONResponse #to handle response
 from fastapi_jwt_auth import AuthJWT
 from models import User, Order
 from schemas import OrderModel, OrderStatusModel
@@ -35,12 +36,11 @@ async def place_order(order:OrderModel, Authorize:AuthJWT=Depends()):
             )
         
     current_user = Authorize.get_jwt_subject()
-    user = session.query(User).filter(User.username==current_user).first()
     
+    user = session.query(User).filter_by(username=current_user).first()
+
     new_order = Order(
-        pizza_size = order.pizza_size,
-        quantity = order.quantity,
-        order_status = order.order_status
+       **order.dict()
     )
     
     new_order.user = user
@@ -48,9 +48,9 @@ async def place_order(order:OrderModel, Authorize:AuthJWT=Depends()):
     session.commit()
     
     response = {
+        "id": new_order.id,
         "pizza_size": new_order.pizza_size,
         "quantity": new_order.quantity,
-        "id": new_order.id,
         "order_status": new_order.order_status
     }
     
@@ -61,7 +61,8 @@ async def place_order(order:OrderModel, Authorize:AuthJWT=Depends()):
 @order_router.get('/orders')
 async def list_all_orders(Authorize:AuthJWT=Depends()):
     """
-        ## lists all the Orders 
+        ## lists all the Order
+        It can be accessed by superusers
     """
     try:
         Authorize.jwt_required()
@@ -70,8 +71,14 @@ async def list_all_orders(Authorize:AuthJWT=Depends()):
                             detail="Invalid Token"
                             )
     
-    orders = session.query(Order).all()
-    return jsonable_encoder(orders)
+    current_user=Authorize.get_jwt_subject()
+    user=session.query(User).filter(User.username==current_user).first()
+    if user.is_staff:
+        orders=session.query(Order).all()
+        return jsonable_encoder(orders)
+    raise  HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="You are not a Superuser !!"
+        )
 
 
 #get one order by id 
@@ -99,13 +106,12 @@ async def get_order_by_id(id:int, Authorize:AuthJWT=Depends()):
  
 
 #Update an Order
-@order_router.put('/order/update/{id}/')
-async def Update_Order(id:int,
+@order_router.patch('/order/update/{id}/')
+async def update_order(id:int,
                        order:OrderModel, 
-                       status_update: OrderStatusModel, 
                        Authorize:AuthJWT=Depends()):
     """
-        ## Updating an Order
+        ## Updating an Order 
         requires :
         quantity:int , 
         pizza_size:str,
@@ -119,15 +125,20 @@ async def Update_Order(id:int,
             detail="Invalid Token"
         )
         
-    order_to_update = session.query(Order).filter(Order.id==id).first()
-    if not order_to_update:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Order not found"
+    username=Authorize.get_jwt_subject()
+    current_user=session.query(User).filter(User.username==username).first()
+    if current_user.is_staff:
+        order_to_update=session.query(Order).filter(Order.id==id).first()
+    raise  HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="You are not a Superuser !!"
         )
-    order_to_update.quantity = order.quantity
-    order_to_update.pizza_size = order.pizza_size
-    order_to_update.order_status = order.order_status
+    #order_to_update.quantity = order.quantity
+    #order_to_update.pizza_size = order.pizza_size
+    #order_to_update.order_status = order.order_status
+    
+    
+    for k,v in order.dict().items():
+        setattr(order_to_update,k,v)
     
     session.commit()
 
