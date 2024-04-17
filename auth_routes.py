@@ -23,13 +23,11 @@ async def signup(user:SignUpModel):
     """
         ## Creat a User
         requires -> 
-        ```
-                username: int
-                email: str
-                password: str
-                is_staff: Bool,
-                is_active: Bool
-        ```
+            username: int
+            email: str
+            password: str
+            is_staff: Bool,
+            is_active: Bool
     """
     
     db_email = session.query(User).filter(User.email==user.email).first()

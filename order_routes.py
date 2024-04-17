@@ -58,7 +58,7 @@ async def place_order(order:OrderModel, Authorize:AuthJWT=Depends()):
 
 
 #list all the orders
-@order_router.get('/orders')
+@order_router.get('/orders', status_code=status.HTTP_202_ACCEPTED)
 async def list_all_orders(Authorize:AuthJWT=Depends()):
     """
         ## lists all the Order
@@ -82,7 +82,7 @@ async def list_all_orders(Authorize:AuthJWT=Depends()):
 
 
 #get one order by id 
-@order_router.get('/orders/{id}')
+@order_router.get('/orders/{id}', status_code=status.HTTP_202_ACCEPTED)
 async def get_order_by_id(id:int, Authorize:AuthJWT=Depends()):
     """
         ## Getting an Order by providing it's ID
@@ -106,16 +106,18 @@ async def get_order_by_id(id:int, Authorize:AuthJWT=Depends()):
  
 
 #Update an Order
-@order_router.patch('/order/update/{id}/')
+@order_router.patch('/order/update/{id}/', status_code=status.HTTP_202_ACCEPTED)
 async def update_order(id:int,
                        order:OrderModel, 
                        Authorize:AuthJWT=Depends()):
     """
         ## Updating an Order 
         requires :
-        quantity:int , 
-        pizza_size:str,
-        pizza_status
+        ```
+            quantity:int , 
+            pizza_size:str,
+            pizza_status
+        ```
     """
     try:
         Authorize.jwt_required()
@@ -129,27 +131,23 @@ async def update_order(id:int,
     current_user=session.query(User).filter(User.username==username).first()
     if current_user.is_staff:
         order_to_update=session.query(Order).filter(Order.id==id).first()
-    raise  HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="You are not a Superuser !!"
-        )
-    #order_to_update.quantity = order.quantity
-    #order_to_update.pizza_size = order.pizza_size
-    #order_to_update.order_status = order.order_status
-    
-    
-    for k,v in order.dict().items():
-        setattr(order_to_update,k,v)
-    
-    session.commit()
+        for k,v in order.dict().items():
+         setattr(order_to_update,k,v)
+        
+        session.commit()
 
-    response={
+        response={
                 "id":order_to_update.id,
                 "quantity":order_to_update.quantity,
                 "pizza_size":order_to_update.pizza_size,
                 "order_status":order_to_update.order_status,
             }
+        return jsonable_encoder(response)
+    else:
+        raise  HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="You are not a Superuser !!"
+        )                    
     
-    return jsonable_encoder(response)
 
 
 # Delete an Order Route
@@ -171,4 +169,4 @@ async def delete_an_order(id:int, Authorize:AuthJWT=Depends()):
     session.delete(order_to_delete)
     session.commit()
     
-    return order_to_delete
+    #return order_to_delete
