@@ -1,4 +1,4 @@
-from DataBase import engine, Base
+from database import engine, Base
 from models import User, Order
 
 

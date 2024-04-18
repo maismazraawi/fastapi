@@ -1,4 +1,4 @@
-from DataBase import Base
+from database import Base
 from sqlalchemy import Column, Integer, Boolean, Text, String, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils.types import ChoiceType

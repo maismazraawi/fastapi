@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse #to handle response
 from fastapi_jwt_auth import AuthJWT
 from models import User, Order
 from schemas import OrderModel, OrderStatusModel
-from DataBase import Session, engine
+from database import Session, engine
 from fastapi.encoders import jsonable_encoder
 
 
@@ -148,7 +148,6 @@ async def update_order(id:int,
             detail="You are not a Superuser !!"
         )                    
     
-
 
 # Delete an Order Route
 @order_router.delete('/order/delete/{id}/', status_code=status.HTTP_204_NO_CONTENT)

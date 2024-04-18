@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from fastapi.openapi.utils import get_openapi
 
+
 app = FastAPI()
 
 def custom_openapi():
@@ -54,9 +55,7 @@ def custom_openapi():
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
-
 app.openapi = custom_openapi
-
 
 @AuthJWT.load_config #create instance of settings class 
 def get_config():
